@@ -22,7 +22,7 @@ double progstep = 0.000;
 double progstep_acc = .0005;	
 
 
-void specialKeys(int key, int x, int y)
+void specialKeys(int key, int x, int y) //视角旋转
 {
 	if (key == GLUT_KEY_RIGHT)
 		world_y += r_step;
@@ -35,7 +35,7 @@ void specialKeys(int key, int x, int y)
 	glutPostRedisplay();
 }
 
-void rotate()
+void rotate() //旋转速度控制
 {
 	double acc = progstep * wind_acc_factor - wing_speed * turbine_factor;
 	wing_speed += acc;
@@ -44,7 +44,7 @@ void rotate()
 	glutPostRedisplay();
 }
 
-void rotateWind(unsigned char key, int x, int y)
+void rotateWind(unsigned char key, int x, int y) //风车旋转操作
 {
 	if (key == 'c')
 		if (progstep < 0)
@@ -61,7 +61,7 @@ void rotateWind(unsigned char key, int x, int y)
 }
 
 
-void print_bitmap_string(void* font, char* s)
+void print_bitmap_string(void* font, char* s) //显示文字
 {
 	if (s&&strlen(s))
 	{
@@ -73,7 +73,7 @@ void print_bitmap_string(void* font, char* s)
 	}
 }
 
-struct Button
+struct Button //按钮控件
 {
 
 	char* st = new char[100];
@@ -131,21 +131,28 @@ struct Button
 };
 Button* pBtn;
 
-//Display Function
-void drawWindMill()
+void init(void) //按钮初始化
+{
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glShadeModel(GL_SMOOTH);
+	pBtn = new Button;
+	pBtn->m_bPressed = false;
+}
+
+
+void drawWindMill() //建模风车
 {
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear color and depth buffers
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 
-	//Construct Three Wings
-	glLoadIdentity();
-	glScalef(scale, scale, scale);
-	glRotatef(world_y, 0, 1.0, world_y_trans);
-	glTranslatef(.0, -0.03, 0);
-	glRotatef(-wing_z, 0.0, 0.0, 1.0);
-	glRotatef(90, 1.0, 0.0, 0.0);
-	glColor3f(1, 1, 0);
-	glBegin(GL_TRIANGLES);
+	glLoadIdentity(); //恢复初始坐标系
+	glScalef(scale, scale, scale); //通过scale参数把缩放视角绑定
+	glRotatef(world_y, 0, 1.0, world_y_trans); //通过world_y，world_y_trans参数把旋转调整绑定
+	glTranslatef(.0, -0.03, 0); //平移对齐
+	glRotatef(-wing_z, 0.0, 0.0, 1.0);  //通过wing_z把风扇转动绑定
+	glRotatef(90, 1.0, 0.0, 0.0); //初始角度
+	glColor3f(1, 1, 0); //渲染颜色
+	glBegin(GL_TRIANGLES); //三角形点组
 	glVertex3f(-0.1f, 0,  -0.2*sqrt(3) / 6);
 	glVertex3d(0.1f, 0, -0.2*sqrt(3) / 6);
 	glVertex3d(0.0f, 0, 0.1*sqrt(3)- 0.2*sqrt(3) / 6);
@@ -223,10 +230,6 @@ void drawWindMill()
 	glVertex3d(-0.1f * 33 / 118, 0, 0.1*sqrt(3) * 324 / 100);
 	glEnd();
 
-
-	
-
-
 	glLoadIdentity();
 	glScalef(scale, scale, scale);
 	glTranslatef(.0, 0.7, 0.05);
@@ -234,13 +237,12 @@ void drawWindMill()
 	glColor3f(0.5, 0.5, 0.4);
 	pBtn->Render();
 
-	
-
 	glFlush();
 	glutSwapBuffers();
 }
 
-void processMenuEvents(int option) {
+void processMenuEvents(int option)  //菜单绑定
+{
 	switch (option) {
 		case 0:
 			progstep = -progstep;
@@ -260,7 +262,8 @@ void processMenuEvents(int option) {
 		}
 }
 
-void createGLUTMenus() {
+void createGLUTMenus() //创建菜单控件
+{
 
 	int menu;
 	menu = glutCreateMenu(processMenuEvents);
@@ -272,16 +275,7 @@ void createGLUTMenus() {
 }
 
 
-
-void init(void)
-{
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glShadeModel(GL_SMOOTH);
-	pBtn = new Button;
-	pBtn->m_bPressed = false;
-}
-
-void mouse(int button, int dir, int x, int y)
+void mouse(int button, int dir, int x, int y) //鼠标按键绑定
 {
 	if (button == 3)
 	{
@@ -300,7 +294,6 @@ void mouse(int button, int dir, int x, int y)
 		switch (dir)
 		{
 		case GLUT_DOWN:
-			printf("Mouse pos : %d\t%d\n", x, y);
 			if (pBtn->OnMouseDown(x, y))
 			{
 				progstep = -progstep;
